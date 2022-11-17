@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<!-- vim:set nowrap: -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+<meta charset="UTF-8">
+<title>RED FLAG OVER PARIS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/common/play.css">
+<script defer src="/common/play.js"></script>
+<script defer src="data.js"></script>
+<script defer src="play.js"></script>
+<style>
+
+main { background-color: dimgray; }
+header { background-color: gainsboro; }
+
+body.Commune header.your_turn { background-color: salmon; }
+body.Versailles header.your_turn { background-color: skyblue; }
+#role_Commune { background-color: salmon; }
+#role_Versailles { background-color: skyblue; }
+
+#log { background-color: ivory; }
+#log .h1 { background-color: tan; font-weight: bold; padding-top:2px; padding-bottom:2px; text-align: center; }
+#log .h2 { background-color: wheat; padding-top:2px; padding-bottom:2px; text-align: center; }
+#log .commune { background-color: lightpink }
+#log .versailles { background-color: lightblue }
+#log > .i { padding-left: 20px; }
+#log .tip { font-style: italic }
+#log .tip:hover { cursor: pointer; text-decoration: underline; }
+
+.role_extra {
+	float: right;
+}
+
+.action {
+	cursor: pointer;
+}
+
+#hand {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin: 20px;
+	gap: 20px;
+}
+
+.card {
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-color: ivory;
+	width: 250px;
+	height: 350px;
+	border-radius: 16px;
+	box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+}
+
+.card_info {
+	padding: 12px 0;
+	border-bottom: 1px solid black;
+	background-color: gray;
+}
+
+.card_info .card {
+	margin: 0 auto;
+	width: 125px;
+	height: 175px;
+	border-radius: 8px;
+}
+
+#tooltip {
+	position: fixed;
+	z-index: 100;
+	right: 240px;
+	top: 60px;
+}
+
+/* MAP */
+
+#mapwrap {
+	box-shadow: 0px 0px 15px rgba(0,0,0,0.8);
+	width: 1500px;
+	height: 1050px;
+}
+
+#map {
+	display: block;
+	width: 1500px;
+	height: 1050px;
+	background-image: url(map75.jpg);
+	background-size: 1500px 1050px;
+}
+
+@media (min-resolution: 97dpi) {
+	#map {
+		background-image: url(map150.jpg);
+	}
+}
+
+.space {
+	position: absolute;
+	border: 8px solid transparent;
+}
+
+.space.action {
+	border-color: white;
+}
+
+.piece {
+	position: absolute;
+	pointer-events: none;
+	background-size: cover;
+	background-repeat: no-repeat;
+	filter: drop-shadow(0px 2px 3px #0008);
+	transition-property: top, left;
+	transition-duration: 1s;
+	transition-timing-function: ease;
+}
+
+.piece.action {
+	filter:
+		drop-shadow(0 -2px 0 white)
+		drop-shadow(0 2px 0 white)
+		drop-shadow(-2px 0 0 white)
+		drop-shadow(2px 0 0 white)
+}
+
+.card.action {
+	box-shadow: 0 0 0 3px white;
+}
+
+/* original size (72dpi?) */
+.piece.cube { width: 28px; height: 30px; }
+.piece.disc { width: 40px; height: 32px; }
+.piece.cylinder { width: 40px; height: 40px; }
+.piece.pawn { width: 28px; height: 48px; }
+
+/* 125% */
+.piece.cube { width: 35px; height: 38px; }
+.piece.disc { width: 50px; height: 40px; }
+.piece.cylinder { width: 50px; height: 50px; }
+.piece.pawn { width: 35px; height: 60px; }
+
+.piece.cube.red { background-image:url(pieces/red_cube.svg) }
+.piece.cube.blue { background-image:url(pieces/blue_cube.svg) }
+.piece.disc.red { background-image:url(pieces/red_disc.svg) }
+.piece.disc.blue { background-image:url(pieces/blue_disc.svg) }
+.piece.cylinder.red { background-image:url(pieces/red_cylinder.svg) }
+.piece.cylinder.blue { background-image:url(pieces/blue_cylinder.svg) }
+.piece.cylinder.orange { background-image:url(pieces/orange_cylinder.svg) }
+.piece.cylinder.purple { background-image:url(pieces/purple_cylinder.svg) }
+.piece.pawn { background-image:url(pieces/pawn.svg) }
+
+#round_marker { top: 965px; }
+#round_marker.round1 { left: 623px; }
+#round_marker.round2 { left: 709px; }
+#round_marker.round3 { left: 805px; }
+#round_marker.round4 { left: 897px; }
+
+#blue_momentum { top: 278px; }
+#blue_momentum.m0 { top: 300px; left: 712px; }
+#blue_momentum.m1 { left: 630px; }
+#blue_momentum.m2 { left: 510px; }
+#blue_momentum.m3 { left: 360px; }
+
+#red_momentum { top: 278px; }
+#red_momentum.m0 { top: 273px; left: 742px; }
+#red_momentum.m1 { left: 820px; }
+#red_momentum.m2 { left: 950px; }
+#red_momentum.m3 { left: 1095px; }
+
+#political_vp { top: 175px; }
+#military_vp { top: 225px; }
+.vp0 { left: 465px; }
+.vp1 { left: 517px; }
+.vp2 { left: 570px; }
+.vp3 { left: 622px; }
+.vp4 { left: 674px; }
+.vp5 { left: 726px; }
+.vp6 { left: 778px; }
+.vp7 { left: 830px; }
+.vp8 { left: 882px; }
+.vp9 { left: 934px; }
+.vp10 { left: 987px; }
+
+/* CARD ACTION POPUP MENU */
+
+#popup {
+	position: fixed;
+	user-select: none;
+	background-color: gainsboro;
+	left: 10px;
+	top: 100px;
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+	z-index: 200;
+	min-width: 20ex;
+	white-space: nowrap;
+	display: none;
+}
+#popup div { padding: 3pt 8pt; color: gray; display: none; }
+#popup div.enabled { color: black; display: block; }
+#popup div.enabled:hover { background-color: teal; color: white; }
+#popup div.always { display: block; }
+
+/* CARD IMAGES */
+
+.card_strategy_back{background-image:url(cards.1x/card_strategy_back.jpg)}
+.card_objective_back{background-image:url(cards.1x/card_objective_back.jpg)}
+.card_1{background-image:url(cards.1x/card_1.jpg)}
+.card_2{background-image:url(cards.1x/card_2.jpg)}
+.card_3{background-image:url(cards.1x/card_3.jpg)}
+.card_4{background-image:url(cards.1x/card_4.jpg)}
+.card_5{background-image:url(cards.1x/card_5.jpg)}
+.card_6{background-image:url(cards.1x/card_6.jpg)}
+.card_7{background-image:url(cards.1x/card_7.jpg)}
+.card_8{background-image:url(cards.1x/card_8.jpg)}
+.card_9{background-image:url(cards.1x/card_9.jpg)}
+.card_10{background-image:url(cards.1x/card_10.jpg)}
+.card_11{background-image:url(cards.1x/card_11.jpg)}
+.card_12{background-image:url(cards.1x/card_12.jpg)}
+.card_13{background-image:url(cards.1x/card_13.jpg)}
+.card_14{background-image:url(cards.1x/card_14.jpg)}
+.card_15{background-image:url(cards.1x/card_15.jpg)}
+.card_16{background-image:url(cards.1x/card_16.jpg)}
+.card_17{background-image:url(cards.1x/card_17.jpg)}
+.card_18{background-image:url(cards.1x/card_18.jpg)}
+.card_19{background-image:url(cards.1x/card_19.jpg)}
+.card_20{background-image:url(cards.1x/card_20.jpg)}
+.card_21{background-image:url(cards.1x/card_21.jpg)}
+.card_22{background-image:url(cards.1x/card_22.jpg)}
+.card_23{background-image:url(cards.1x/card_23.jpg)}
+.card_24{background-image:url(cards.1x/card_24.jpg)}
+.card_25{background-image:url(cards.1x/card_25.jpg)}
+.card_26{background-image:url(cards.1x/card_26.jpg)}
+.card_27{background-image:url(cards.1x/card_27.jpg)}
+.card_28{background-image:url(cards.1x/card_28.jpg)}
+.card_29{background-image:url(cards.1x/card_29.jpg)}
+.card_30{background-image:url(cards.1x/card_30.jpg)}
+.card_31{background-image:url(cards.1x/card_31.jpg)}
+.card_32{background-image:url(cards.1x/card_32.jpg)}
+.card_33{background-image:url(cards.1x/card_33.jpg)}
+.card_34{background-image:url(cards.1x/card_34.jpg)}
+.card_35{background-image:url(cards.1x/card_35.jpg)}
+.card_36{background-image:url(cards.1x/card_36.jpg)}
+.card_37{background-image:url(cards.1x/card_37.jpg)}
+.card_38{background-image:url(cards.1x/card_38.jpg)}
+.card_39{background-image:url(cards.1x/card_39.jpg)}
+.card_40{background-image:url(cards.1x/card_40.jpg)}
+.card_41{background-image:url(cards.1x/card_41.jpg)}
+.card_42{background-image:url(cards.1x/card_42.jpg)}
+.card_43{background-image:url(cards.1x/card_43.jpg)}
+.card_44{background-image:url(cards.1x/card_44.jpg)}
+.card_45{background-image:url(cards.1x/card_45.jpg)}
+.card_46{background-image:url(cards.1x/card_46.jpg)}
+.card_47{background-image:url(cards.1x/card_47.jpg)}
+.card_48{background-image:url(cards.1x/card_48.jpg)}
+.card_49{background-image:url(cards.1x/card_49.jpg)}
+.card_50{background-image:url(cards.1x/card_50.jpg)}
+.card_51{background-image:url(cards.1x/card_51.jpg)}
+.card_52{background-image:url(cards.1x/card_52.jpg)}
+.card_53{background-image:url(cards.1x/card_53.jpg)}
+.card_54{background-image:url(cards.1x/card_54.jpg)}
+@media (min-resolution:97dpi) {
+.card_strategy_back{background-image:url(cards.2x/card_strategy_back.jpg)}
+.card_objective_back{background-image:url(cards.2x/card_objective_back.jpg)}
+.card_1{background-image:url(cards.2x/card_1.jpg)}
+.card_2{background-image:url(cards.2x/card_2.jpg)}
+.card_3{background-image:url(cards.2x/card_3.jpg)}
+.card_4{background-image:url(cards.2x/card_4.jpg)}
+.card_5{background-image:url(cards.2x/card_5.jpg)}
+.card_6{background-image:url(cards.2x/card_6.jpg)}
+.card_7{background-image:url(cards.2x/card_7.jpg)}
+.card_8{background-image:url(cards.2x/card_8.jpg)}
+.card_9{background-image:url(cards.2x/card_9.jpg)}
+.card_10{background-image:url(cards.2x/card_10.jpg)}
+.card_11{background-image:url(cards.2x/card_11.jpg)}
+.card_12{background-image:url(cards.2x/card_12.jpg)}
+.card_13{background-image:url(cards.2x/card_13.jpg)}
+.card_14{background-image:url(cards.2x/card_14.jpg)}
+.card_15{background-image:url(cards.2x/card_15.jpg)}
+.card_16{background-image:url(cards.2x/card_16.jpg)}
+.card_17{background-image:url(cards.2x/card_17.jpg)}
+.card_18{background-image:url(cards.2x/card_18.jpg)}
+.card_19{background-image:url(cards.2x/card_19.jpg)}
+.card_20{background-image:url(cards.2x/card_20.jpg)}
+.card_21{background-image:url(cards.2x/card_21.jpg)}
+.card_22{background-image:url(cards.2x/card_22.jpg)}
+.card_23{background-image:url(cards.2x/card_23.jpg)}
+.card_24{background-image:url(cards.2x/card_24.jpg)}
+.card_25{background-image:url(cards.2x/card_25.jpg)}
+.card_26{background-image:url(cards.2x/card_26.jpg)}
+.card_27{background-image:url(cards.2x/card_27.jpg)}
+.card_28{background-image:url(cards.2x/card_28.jpg)}
+.card_29{background-image:url(cards.2x/card_29.jpg)}
+.card_30{background-image:url(cards.2x/card_30.jpg)}
+.card_31{background-image:url(cards.2x/card_31.jpg)}
+.card_32{background-image:url(cards.2x/card_32.jpg)}
+.card_33{background-image:url(cards.2x/card_33.jpg)}
+.card_34{background-image:url(cards.2x/card_34.jpg)}
+.card_35{background-image:url(cards.2x/card_35.jpg)}
+.card_36{background-image:url(cards.2x/card_36.jpg)}
+.card_37{background-image:url(cards.2x/card_37.jpg)}
+.card_38{background-image:url(cards.2x/card_38.jpg)}
+.card_39{background-image:url(cards.2x/card_39.jpg)}
+.card_40{background-image:url(cards.2x/card_40.jpg)}
+.card_41{background-image:url(cards.2x/card_41.jpg)}
+.card_42{background-image:url(cards.2x/card_42.jpg)}
+.card_43{background-image:url(cards.2x/card_43.jpg)}
+.card_44{background-image:url(cards.2x/card_44.jpg)}
+.card_45{background-image:url(cards.2x/card_45.jpg)}
+.card_46{background-image:url(cards.2x/card_46.jpg)}
+.card_47{background-image:url(cards.2x/card_47.jpg)}
+.card_48{background-image:url(cards.2x/card_48.jpg)}
+.card_49{background-image:url(cards.2x/card_49.jpg)}
+.card_50{background-image:url(cards.2x/card_50.jpg)}
+.card_51{background-image:url(cards.2x/card_51.jpg)}
+.card_52{background-image:url(cards.2x/card_52.jpg)}
+.card_53{background-image:url(cards.2x/card_53.jpg)}
+.card_54{background-image:url(cards.2x/card_54.jpg)}
+}
+
+</style>
+</head>
+<body>
+
+<div id="tooltip" class="card hide"></div>
+
+<div id="popup" onmouseleave="hide_popup_menu()">
+<div id="menu_card_event" class="always" onclick="on_card_event()">Play event</div>
+<div id="menu_card_ops" class="always" onclick="on_card_ops()">Operations</div>
+<div id="menu_card_use_discarded" class="always" onclick="on_card_use_discarded()">Use discarded event</div>
+<div id="menu_card_advance_momentum" class="always" onclick="on_card_advance_momentum()">Advance momentum</div>
+</div>
+
+<header>
+	<div id="toolbar">
+	<div class="menu">
+		<div class="menu_title"><img src="/images/cog.svg"></div>
+		<div class="menu_popup">
+			<a class="menu_item" href="info/rules.html" target="_blank">Rules</a>
+			<a class="menu_item" href="info/playbook.html" target="_blank">Playbook</a>
+			<a class="menu_item" href="info/pac.html" target="_blank">Player Aids</a>
+			<a class="menu_item" href="info/cards.html" target="_blank">Cards</a>
+			<div class="resign menu_separator"></div>
+			<div class="resign menu_item" onclick="confirm_resign()">Resign</div>
+		</div>
+	</div>
+	<div class="icon_button" onclick="toggle_zoom()"><img src="/images/magnifying-glass.svg"></div>
+	<div class="icon_button" onclick="toggle_log()"><img src="/images/scroll-quill.svg"></div>
+	</div>
+	<div id="prompt"></div>
+	<div id="actions"></div>
+</header>
+
+<aside>
+	<div id="roles">
+		<div class="role" id="role_Commune">
+			<div class="role_name">
+				Commune
+				<div class="role_extra" id="commune_info"></div>
+				<div class="role_user">-</div>
+			</div>
+		</div>
+		<div class="role" id="role_Versailles">
+			<div class="role_name">
+				Versailles
+				<div class="role_extra" id="versailles_info"></div>
+				<div class="role_user">-</div>
+			</div>
+		</div>
+		<div class="card_info"><div id="active_card" class="card card_strategy_back"></div></div>
+	</div>
+	<div id="log"></div>
+</aside>
+
+<main>
+
+<div id="mapwrap" class="fit">
+<div id="map">
+<div id="spaces"></div>
+<div id="pieces">
+<div id="round_marker" class="piece pawn round1"></div>
+<div id="political_vp" class="piece cylinder orange vp5"></div>
+<div id="military_vp" class="piece cylinder purple vp5"></div>
+<div id="red_momentum" class="piece cylinder red m0"></div>
+<div id="blue_momentum" class="piece cylinder blue m0"></div>
+</div>
+</div>
+</div>
+
+<div id="hand"></div>
+
+</main>
+
+<footer id="status"></footer>
+
+</body>
