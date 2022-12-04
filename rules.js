@@ -1,5 +1,7 @@
 "use strict"
 
+// TODO: change active_card to explicit discard pile ?
+
 const data = require("./data")
 
 const RED_CUBE_POOL = 0
@@ -27,7 +29,7 @@ var game, view
 
 var states = {}
 
-exports.scenarios = [ "Standard" ]
+exports.scenarios = [ "Standard", "Censorship" ]
 
 exports.roles = [ "Commune", "Versailles" ]
 
@@ -126,6 +128,7 @@ exports.view = function(state, current) {
 exports.setup = function (seed, scenario, options) {
 	game = {
 		seed: seed,
+		scenario: scenario,
 		log: [],
 		undo: [],
 		active: "Both",
@@ -195,6 +198,10 @@ exports.setup = function (seed, scenario, options) {
 	}
 
 	log_h1("Red Flag Over Paris")
+
+	if (game.scenario !== "Standard")
+		log(game.scenario)
+
 	log_h1("Round 1")
 
 	for (let i = 1; i <= 41; ++i)
@@ -207,7 +214,11 @@ exports.setup = function (seed, scenario, options) {
 	shuffle(game.strategy_deck)
 	shuffle(game.objective_deck)
 
-	for (let i = 0; i < 4; ++i) {
+	let n = 4
+	if (game.scenario === "Censorship")
+		n = 5
+
+	for (let i = 0; i < n; ++i) {
 		game.red_hand.push(game.strategy_deck.pop())
 		game.blue_hand.push(game.strategy_deck.pop())
 	}
@@ -221,6 +232,16 @@ exports.setup = function (seed, scenario, options) {
 }
 
 // === GAME STATES ===
+
+function discard_card(c) {
+	array_remove_item(player_hand(game.active), c)
+	game.active_card = c
+}
+
+function recycle_card(c) {
+	array_remove_item(player_hand(game.active), c)
+	game.strategy_deck.unshift(c)
+}
 
 function is_objective_card(c) {
 	return c >= 42 && c <= 53
@@ -255,6 +276,8 @@ function can_advance_momentum() {
 	return game.blue_momentum < 3
 }
 
+// === CHOOSE OBJECTIVE CARD ===
+
 states.choose_objective_card = {
 	inactive: "choose an objective card",
 	prompt(current) {
@@ -274,7 +297,7 @@ states.choose_objective_card = {
 			game.blue_hand = game.blue_hand.filter(c => !is_objective_card(c))
 		}
 		if (game.red_objective > 0 && game.blue_objective > 0)
-			goto_initiative_phase()
+			end_choose_objective_card()
 		else if (game.red_objective > 0)
 			game.active = "Versailles"
 		else if (game.blue_objective > 0)
@@ -283,6 +306,12 @@ states.choose_objective_card = {
 			game.active = "Both"
 	},
 }
+
+function end_choose_objective_card() {
+	goto_initiative_phase()
+}
+
+// === INITIATIVE PHASE ===
 
 function goto_initiative_phase() {
 	game.active = "Commune"
@@ -299,16 +328,48 @@ states.initiative_phase = {
 	commune() {
 		log("Initiative: Commune")
 		game.initiative = "Commune"
-		game.active = game.initiative
-		goto_strategy_phase()
+		end_initiative_phase()
 	},
 	versailles() {
 		log("Initiative: Versailles")
 		game.initiative = "Versailles"
-		game.active = game.initiative
-		goto_strategy_phase()
+		end_initiative_phase()
 	},
 }
+
+function end_initiative_phase() {
+	game.active = game.initiative
+	if (game.scenario === "Censorship")
+		goto_censorship_phase()
+	else
+		goto_strategy_phase()
+}
+
+// === CENSORSHIP PHASE ===
+
+function goto_censorship_phase() {
+	game.state = "censorship_phase"
+}
+
+states.censorship_phase = {
+	inactive: "censorship phase",
+	prompt() {
+		view.prompt = "Discard a card from your hand."
+		for (let c of player_hand(game.active))
+			if (is_strategy_card(c))
+				gen_action("card", c)
+	},
+	card(c) {
+		log(`Discarded #${c}.`)
+		discard_card(c)
+		if (game.active === game.initiative)
+			game.active = enemy_player()
+		else
+			goto_strategy_phase()
+	},
+}
+
+// === PLAYING STRATEGY CARDS ===
 
 function goto_strategy_phase() {
 	clear_undo()
@@ -341,23 +402,23 @@ states.strategy_phase = {
 	card_event(c) {
 		push_undo()
 		log(`Played #${c} for event.`)
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
+		discard_card(c)
 		goto_play_event()
 	},
 	card_ops(c) {
 		push_undo()
 		log(`Played #${c} for ${data.cards[c].ops} ops.`)
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
+		discard_card(c)
 		game.count = data.cards[c].ops
 		game.state = "operations"
 	},
 	card_advance_momentum(c) {
 		push_undo()
 		log(`Played #${c} to advance momentum.`)
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
+		if (game.scenario === "Censorship")
+			recycle_card(c)
+		else
+			discard_card(c)
 		if (game.active === "Commune")
 			game.red_momentum += 1
 		else
@@ -369,8 +430,7 @@ states.strategy_phase = {
 		push_undo()
 		log(`Discarded #${c} to play #${game.active_card}.`)
 		let old_c = game.active_card
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
+		discard_card(c)
 		goto_play_event(old_c)
 	},
 }
