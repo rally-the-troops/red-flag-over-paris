@@ -60,7 +60,9 @@ const data = {
 	],
 
 	space_names: [
-		"Red Cube Pool",
+		"Red Cube Pool 1",
+		"Red Cube Pool 2",
+		"Red Cube Pool 3",
 		"Red Crisis Track Start",
 		"Red Crisis Track Escalation",
 		"Red Crisis Track Tension",

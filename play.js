@@ -52,6 +52,9 @@ const boxes = {
 	"Blue Bonus Cubes 1": [1394,89,334,155],
 	"Blue Bonus Cubes 2": [1061,89,333,155],
 	"Blue Bonus Cubes 3": [728,89,333,155],
+	"Red Pool 1": [3149,1319,461,157],
+	"Red Pool 2": [3610,1319,543,157],
+	"Red Pool 3": [4154,1319,629,157],
 }
 
 function is_card_action(action, card) {

@@ -40,9 +40,9 @@
      inkscape:window-height="480"
      id="namedview6"
      showgrid="false"
-     inkscape:zoom="0.25355223"
-     inkscape:cx="925.89635"
-     inkscape:cy="666.02178"
+     inkscape:zoom="0.57188876"
+     inkscape:cx="4053.5891"
+     inkscape:cy="1139.1727"
      inkscape:current-layer="svg4"
      inkscape:document-rotation="0"
      showguides="true"
@@ -318,22 +318,6 @@
      y="1111.5737"
      inkscape:label="track-RM-0" />
   <rect
-     style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:1.00019"
-     id="rect54"
-     width="461.02997"
-     height="206.55724"
-     x="3149.4553"
-     y="1111.5737"
-     inkscape:label="track-RM-C1" />
-  <rect
-     style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:0.996788"
-     id="rect56"
-     width="543.05432"
-     height="206.55727"
-     x="3610.489"
-     y="1111.5737"
-     inkscape:label="track-RM-C2" />
-  <rect
      style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:0.99799"
      id="rect58"
      width="629.32001"
@@ -398,4 +382,28 @@
      x="727.73248"
      y="88.739098"
      inkscape:label="Blue Bonus Cubes 3" />
+  <rect
+     style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:1.00019"
+     id="rect54"
+     width="461.03003"
+     height="157.42322"
+     x="3149.4634"
+     y="1319.1292"
+     inkscape:label="Red Pool 1" />
+  <rect
+     style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:0.996788"
+     id="rect56"
+     width="543.05444"
+     height="157.42322"
+     x="3610.4934"
+     y="1319.1292"
+     inkscape:label="Red Pool 2" />
+  <rect
+     style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:0.99799"
+     id="rect58-3"
+     width="628.76788"
+     height="157.92198"
+     x="4153.5479"
+     y="1318.6304"
+     inkscape:label="Red Pool 3" />
 </svg>
