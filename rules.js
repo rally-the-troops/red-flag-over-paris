@@ -2,34 +2,253 @@
 
 const data = require("./data")
 
-const RED_CUBE_POOL = 0
-const RED_CRISIS_TRACK = [1, 2, 3, 4]
-const RED_BONUS_CUBES = [ 5, 6, 7 ]
-const BLUE_CUBE_POOL = 8
-const BLUE_CRISIS_TRACK = [9, 10, 11, 12]
-const BLUE_BONUS_CUBES = [ 13, 14, 15 ]
-const S_ROYALISTS = 16
-const S_NATIONAL_ASSEMBLY = 17
-const S_REPUBLICANS = 18
-const S_CATHOLIC_CHURCH = 19
-const S_PRESS = 20
-const S_SOCIAL_MOVEMENTS = 21
-const S_MONT_VALERIEN = 22
-const S_BUTTE_MONTMARTRE = 23
-const S_FORT_D_ISSY = 24
-const S_BUTTE_AUX_CAILLES = 25
-const S_PERE_LACHAISE = 26
-const S_CHATEAU_DE_VINCENNES = 27
-const S_PRUSSIAN_OCCUPIED_TERRITORY = 28
-const S_VERSAILLES_HQ = 29
+const RED_CUBE_POOL = [0, 1, 2]
+const RED_CRISIS_TRACK = [3, 4, 5, 6]
+const RED_BONUS_CUBES = [7, 8, 9]
+const BLUE_CUBE_POOL = 10
+const BLUE_CRISIS_TRACK = [11, 12, 13, 14]
+const BLUE_BONUS_CUBES = [15, 16, 17]
+const S_ROYALISTS = 18
+const S_NATIONAL_ASSEMBLY = 19
+const S_REPUBLICANS = 20
+const S_CATHOLIC_CHURCH = 21
+const S_PRESS = 22
+const S_SOCIAL_MOVEMENTS = 23
+const S_MONT_VALERIEN = 24
+const S_BUTTE_MONTMARTRE = 25
+const S_FORT_D_ISSY = 26
+const S_BUTTE_AUX_CAILLES = 27
+const S_PERE_LACHAISE = 28
+const S_CHATEAU_DE_VINCENNES = 29
+const S_PRUSSIAN_OCCUPIED_TERRITORY = 30
+const S_VERSAILLES_HQ = 31
 
-var game, view
+const crisis_zones = [
+	{
+		id: RED_CRISIS_TRACK[0],
+		name: "Starting",
+		player: "Commune",
+		size: 3,
+		is_breachable: false
+	},
+	{
+		id: RED_CRISIS_TRACK[1],
+		name: "Escalation",
+		player: "Commune",
+		size: 2,
+		is_breachable: true,
+		bonus_area: RED_BONUS_CUBES[0]
+	},
+	{
+		id: RED_CRISIS_TRACK[2],
+		name: "Tension",
+		player: "Commune",
+		size: 2,
+		is_breachable: true,
+		bonus_area: RED_BONUS_CUBES[1]
+	},
+	{
+		id: RED_CRISIS_TRACK[3],
+		name: "Final Crisis",
+		player: "Commune",
+		size: 2,
+		is_breachable: true,
+		bonus_area: RED_BONUS_CUBES[2]
+	},
+	{
+		id: BLUE_CRISIS_TRACK[0],
+		name: "Starting",
+		player: "Versailles",
+		size: 1,
+		is_breachable: false
+	},
+	{
+		id: BLUE_CRISIS_TRACK[1],
+		name: "Escalation",
+		player: "Versailles",
+		size: 2,
+		is_breachable: true,
+		bonus_area: BLUE_BONUS_CUBES[0]
+	},
+	{
+		id: BLUE_CRISIS_TRACK[2],
+		name: "Tension",
+		player: "Versailles",
+		size: 1,
+		is_breachable: true,
+		bonus_area: BLUE_BONUS_CUBES[1]
+	},
+	{
+		id: BLUE_CRISIS_TRACK[3],
+		name: "Final Crisis",
+		player: "Versailles",
+		size: 2,
+		is_breachable: true,
+		bonus_area: BLUE_BONUS_CUBES[2]
+	}
+];
+const spaces = [
+	{
+		id: S_ROYALISTS,
+		name: "Royalists",
+		type: "Political",
+		dimension: "Institutional",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_CATHOLIC_CHURCH, S_PRESS],
+		presence: ["Versailles"],
+		permanent_presence: "Versailles",
+		controlled_by: "Versailles"
+	},
+	{
+		id: S_NATIONAL_ASSEMBLY,
+		name: "National Assembly",
+		type: "Political",
+		dimension: "Institutional",
+		is_pivotal_space: true,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_ROYALISTS, S_REPUBLICANS],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_REPUBLICANS,
+		name: "Republicans",
+		type: "Political",
+		dimension: "Institutional",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_PRESS, S_SOCIAL_MOVEMENTS],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_CATHOLIC_CHURCH,
+		name: "Catholic Church",
+		type: "Political",
+		dimension: "Public Opinion",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_ROYALISTS, S_PRESS],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_PRESS,
+		name: "Press",
+		type: "Political",
+		dimension: "Public Opinion",
+		is_pivotal_space: true,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_ROYALISTS, S_REPUBLICANS, S_CATHOLIC_CHURCH, S_SOCIAL_MOVEMENTS],
+		presence: ["Versailles", "Commune"],
+		controlled_by: "None"
+	},
+	{
+		id: S_SOCIAL_MOVEMENTS,
+		name: "Social Movements",
+		type: "Political",
+		dimension: "Public Opinion",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_REPUBLICANS, S_PRESS],
+		presence: ["Commune"],
+		permanent_presence: "Commune",
+		controlled_by: "Commune"
+	},
+	{
+		id: S_MONT_VALERIEN,
+		name: "Mont Valérien",
+		type: "Military",
+		dimension: "Forts",
+		is_pivotal_space: true,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_BUTTE_MONTMARTRE, S_VERSAILLES_HQ],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_BUTTE_MONTMARTRE,
+		name: "Butte Montmartre",
+		type: "Military",
+		dimension: "Paris",
+		is_pivotal_space: true,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_MONT_VALERIEN, S_BUTTE_AUX_CAILLES, S_PERE_LACHAISE],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_FORT_D_ISSY,
+		name: "Fort D'Issy",
+		type: "Military",
+		dimension: "Forts",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_VERSAILLES_HQ, S_BUTTE_AUX_CAILLES, S_CHATEAU_DE_VINCENNES],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_BUTTE_AUX_CAILLES,
+		name: "Butte-Aux-Cailles",
+		type: "Military",
+		dimension: "Paris",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_FORT_D_ISSY, S_BUTTE_MONTMARTRE, S_PERE_LACHAISE],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_PERE_LACHAISE,
+		name: "Père Lachaise",
+		type: "Military",
+		dimension: "Paris",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_BUTTE_MONTMARTRE, S_BUTTE_AUX_CAILLES, S_CHATEAU_DE_VINCENNES, S_PRUSSIAN_OCCUPIED_TERRITORY],
+		presence: ["Commune"],
+		permanent_presence: "Commune",
+		controlled_by: "Commune"
+	},
+	{
+		id: S_CHATEAU_DE_VINCENNES,
+		name: "Château de Vincennes",
+		type: "Military",
+		dimension: "Forts",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: true,
+		adjacent_to: [S_FORT_D_ISSY, S_PERE_LACHAISE, S_PRUSSIAN_OCCUPIED_TERRITORY],
+		presence: [],
+		controlled_by: "None"
+	},
+	{
+		id: S_PRUSSIAN_OCCUPIED_TERRITORY,
+		name: "Prussian Occupied Territory",
+		type: "Standalone",
+		dimension: "Standalone",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: false,
+		adjacent_to: [S_PERE_LACHAISE, S_CHATEAU_DE_VINCENNES],
+		controlled_by: "None"
+	},
+	{
+		id: S_VERSAILLES_HQ,
+		name: "Versailles HQ",
+		type: "Standalone",
+		dimension: "Standalone",
+		is_pivotal_space: false,
+		is_eligible_for_pieces: false,
+		adjacent_to: [S_MONT_VALERIEN, S_FORT_D_ISSY],
+		controlled_by: "Versailles"
+	}
+];
+let game, view;
+let states = {}
 
-var states = {}
-
-exports.scenarios = [ "Standard" ]
-
-exports.roles = [ "Commune", "Versailles" ]
+exports.scenarios = ["Standard"]
+exports.roles = ["Commune", "Versailles"]
 
 exports.action = function (state, current, action, arg) {
 	game = state
@@ -50,7 +269,7 @@ exports.resign = function (state, current) {
 		log_br()
 		log(`${current} resigned.`)
 		game.state = "game_over"
-		game.active = null
+		game.active_player = null
 		game.state = "game_over"
 		game.result = (current === "Commune" ? "Versailles" : "Commune")
 		game.victory = current + " resigned."
@@ -63,64 +282,58 @@ exports.is_checkpoint = function (a, b) {
 }
 
 exports.view = function(state, current) {
-	game = state
-
+	game = state;
 	view = {
 		log: game.log,
 		prompt: null,
 		actions: null,
-
 		round: game.round,
 		initiative: game.initiative,
 		political_vp: game.political_vp,
 		military_vp: game.military_vp,
-
 		red_hand: game.red_hand.length,
 		blue_hand: game.blue_hand.length,
 		red_momentum: game.red_momentum,
 		blue_momentum: game.blue_momentum,
-
+		spaces: game.spaces,
 		discs: game.discs,
 		cubes: game.cubes,
-
-		active_card: game.active_card,
+		discarded_card: game.discarded_card,
 		hand: 0,
 		objective: 0
-	}
+	};
 
 	if (current === "Commune") {
-		view.hand = game.red_hand
-		view.objective = game.red_objective
+		view.hand = game.red_hand;
+		view.objective = game.red_objective;
 	}
 	if (current === "Versailles") {
-		view.hand = game.blue_hand
-		view.objective = game.blue_objective
+		view.hand = game.blue_hand;
+		view.objective = game.blue_objective;
 	}
-
 	if (game.state === "game_over") {
-		view.prompt = game.victory
-	} else if (current === "Observer" || (game.active !== current && game.active !== "Both")) {
+		view.prompt = game.victory;
+	} else if (current === "Observer" || (game.active_player !== current && game.active_player !== "Both")) {
 		if (states[game.state]) {
-			let inactive = states[game.state].inactive || game.state
-			view.prompt = `Waiting for ${game.active} to ${inactive}...`
+			let inactive = states[game.state].inactive || game.state;
+			view.prompt = `Waiting for ${game.active_player} to ${inactive}...`;
 		} else {
-			view.prompt = "Unknown state: " + game.state
+			view.prompt = "Unknown state: " + game.state;
 		}
 	} else {
-		view.actions = {}
+		view.actions = {};
 		if (states[game.state])
-			states[game.state].prompt(current)
+			states[game.state].prompt(current);
 		else
-			view.prompt = "Unknown state: " + game.state
+			view.prompt = "Unknown state: " + game.state;
 		if (view.actions.undo === undefined) {
 			if (game.undo && game.undo.length > 0)
-				view.actions.undo = 1
+				view.actions.undo = 1;
 			else
-				view.actions.undo = 0
+				view.actions.undo = 0;
 		}
 	}
-
-	return view
+	return view;
 }
 
 exports.setup = function (seed, scenario, options) {
@@ -128,26 +341,32 @@ exports.setup = function (seed, scenario, options) {
 		seed: seed,
 		log: [],
 		undo: [],
-		active: "Both",
-		state: "choose_objective_card",
-
+		active_player: "Both",
+		state: "objective_card_selection",
 		round: 1,
 		initiative: null,
 		political_vp: 0,
 		military_vp: 0,
 		red_momentum: 0,
 		blue_momentum: 0,
-
 		strategy_deck: [],
 		objective_deck: [],
-
-		red_hand: [ 34 ],
+		red_hand: [34],
 		red_objective: 0,
-		blue_hand: [ 17 ],
+		blue_hand: [17],
 		blue_objective: 0,
-
+		discarded_card: 0,
+		discs: [
+			// Commune discs
+			-1,
+			-1,
+			// Versailles discs
+			-1,
+			-1
+		],
+		spaces: spaces,
 		cubes: [
-			// red cubes
+			// Commune cubes
 			RED_CRISIS_TRACK[0],
 			RED_CRISIS_TRACK[0],
 			RED_CRISIS_TRACK[0],
@@ -166,8 +385,7 @@ exports.setup = function (seed, scenario, options) {
 			S_PRESS,
 			S_SOCIAL_MOVEMENTS,
 			S_PERE_LACHAISE,
-
-			// blue cubes
+			// Versailles cubes
 			BLUE_CRISIS_TRACK[0],
 			BLUE_CRISIS_TRACK[1],
 			BLUE_CRISIS_TRACK[1],
@@ -187,79 +405,66 @@ exports.setup = function (seed, scenario, options) {
 			S_ROYALISTS,
 			S_PRESS,
 		],
+		operations_card: 0,
+		operations_points: 0,
+		operations_space_type: null,
+		operations_space_scope: [],
+		operations_space_id: null,
+		operations_action: null,
+		operations_military_strength: 0
+	};
+	log_h1("Red Flag Over Paris");
+	log_h1("Round 1");
 
-		discs: [ 0, 0, 0, 0 ],
-
-		active_card: 0,
-		count: 0,
+	for (let i = 1; i <= 41; ++i) {
+		if (i !== 17 && i !== 34) {
+			game.strategy_deck.push(i);
+		}
 	}
-
-	log_h1("Red Flag Over Paris")
-	log_h1("Round 1")
-
-	for (let i = 1; i <= 41; ++i)
-		if (i !== 17 && i !== 34)
-			game.strategy_deck.push(i)
-
-	for (let i = 42; i <= 53; ++i)
-		game.objective_deck.push(i)
-
-	shuffle(game.strategy_deck)
-	shuffle(game.objective_deck)
-
+	for (let i = 42; i <= 53; ++i) {
+		game.objective_deck.push(i);
+	}
+	shuffle(game.strategy_deck);
+	shuffle(game.objective_deck);
 	for (let i = 0; i < 4; ++i) {
-		game.red_hand.push(game.strategy_deck.pop())
-		game.blue_hand.push(game.strategy_deck.pop())
+		game.red_hand.push(game.strategy_deck.pop());
+		game.blue_hand.push(game.strategy_deck.pop());
 	}
-
 	for (let i = 0; i < 2; ++i) {
-		game.red_hand.push(game.objective_deck.pop())
-		game.blue_hand.push(game.objective_deck.pop())
+		game.red_hand.push(game.objective_deck.pop());
+		game.blue_hand.push(game.objective_deck.pop());
 	}
-
-	return game
+	return game;
 }
 
 // === GAME STATES ===
 
-function is_objective_card(c) {
-	return c >= 42 && c <= 53
+states.initiative_phase = {
+	inactive: "decide player order",
+	prompt() {
+		view.prompt = "Decide player order."
+		view.actions.commune = 1
+		view.actions.versailles = 1
+	},
+	commune() {
+		log("Initiative: Commune")
+		game.initiative = "Commune"
+		game.active_player = game.initiative
+		goto_strategy_phase()
+	},
+	versailles() {
+		log("Initiative: Versailles")
+		game.initiative = "Versailles"
+		game.active_player = game.initiative
+		goto_strategy_phase()
+	},
 }
 
-function is_strategy_card(c) {
-	return !is_objective_card(c) && c !== 17 && c !== 34
-}
-
-function enemy_player() {
-	if (game.active === "Commune")
-		return "Versailles"
-	return "Commune"
-}
-
-function player_hand(current) {
-	if (current === "Commune")
-		return game.red_hand
-	return game.blue_hand
-}
-
-function can_play_event(c) {
-	let side = data.cards[c].side
-	if (side === game.active || side === "Neutral")
-		return true
-	return false
-}
-
-function can_advance_momentum() {
-	if (game.active === "Commune")
-		return game.red_momentum < 3
-	return game.blue_momentum < 3
-}
-
-states.choose_objective_card = {
+states.objective_card_selection = {
 	inactive: "choose an objective card",
 	prompt(current) {
 		view.prompt = "Choose an Objective card."
-		for (let c of player_hand(current)) {
+		for (let c of get_player_hand(current)) {
 			if (is_objective_card(c)) {
 				gen_action("card", c)
 			}
@@ -276,62 +481,189 @@ states.choose_objective_card = {
 		if (game.red_objective > 0 && game.blue_objective > 0)
 			goto_initiative_phase()
 		else if (game.red_objective > 0)
-			game.active = "Versailles"
+			game._player = "Versailles"
 		else if (game.blue_objective > 0)
-			game.active = "Commune"
+			game.active_player = "Commune"
 		else
-			game.active = "Both"
+			game.active_player = "Both"
 	},
 }
 
-function goto_initiative_phase() {
-	game.active = "Commune"
-	game.state = "initiative_phase"
-}
-
-states.initiative_phase = {
-	inactive: "decide player order",
+states.operations_execution = {
+	inactive: "execute operations",
 	prompt() {
-		view.prompt = "Decide player order."
-		view.actions.commune = 1
-		view.actions.versailles = 1
+		if (game.operations_points === 0) {
+			log("No operations points left");
+			log("Finished operations points spending");
+			clean_operations_execution();
+			resume_strategy_phase();
+		}
+		if (game.operations_action === "check_removal_scope") {
+			set_operations_space_scope();
+			adjust_operations_space_scope("remove");
+			if (game.operations_space_scope > 0) {
+				game.operations_action = "remove";
+			}
+			else {
+				log("No spaces available for pieces removal");
+				game.operations_action = "check_placement_scope";
+			}
+		}
+		if (game.operations_action === "check_placement_scope") {
+			set_operations_space_scope();
+			adjust_operations_space_scope("place");
+			if (game.operations_space_scope > 0) {
+				game.operations_action = "place";
+			}
+			else {
+				log("No spaces available for pieces placement");
+				log("Finished operations points spending");
+				clean_operations_execution();
+				resume_strategy_phase();
+			}
+		}
+		if (game.operations_action === "remove") {
+			adjust_operations_space_scope("remove");
+			activate_scope_spaces();
+			if (game.operations_space_scope > 0) {
+				view.prompt = `Remove ${get_enemy_player()} pieces or skip`;
+				view.actions.finish_pieces_removal = 1;
+			}
+			else {
+				log("No spaces available for pieces removal");
+				game.operations_action = "check_placement_scope";
+			}
+		}
+		if (game.operations_action === "place") {
+			adjust_operations_space_scope("place");
+			activate_scope_spaces();
+			if (game.operations_space_scope > 0) {
+				view.prompt = `Place ${game.active_player} pieces or finish`;
+				view.actions.finish_operations_execution = 1;
+			}
+			else {
+				log("No spaces available for pieces placement");
+				log("Finished operations points spending");
+				clean_operations_execution();
+				resume_strategy_phase();
+			}
+		}
 	},
-	commune() {
-		log("Initiative: Commune")
-		game.initiative = "Commune"
-		game.active = game.initiative
-		goto_strategy_phase()
+	finish_pieces_removal() {
+		log("Finished pieces removal");
+		game.operations_action = "check_placement_scope";
+		goto_execute_operations();
 	},
-	versailles() {
-		log("Initiative: Versailles")
-		game.initiative = "Versailles"
-		game.active = game.initiative
-		goto_strategy_phase()
+	finish_operations_execution() {
+		log("Finished operations points spending");
+		clean_operations_execution();
+		resume_strategy_phase();
+	},
+	space(space_id) {
+		push_undo();
+		log(`Space selected: ${game.spaces.find(x => x.id === space_id).name}`);
+		game.operations_space_id = space_id;
+		if (game.operations_action === "remove") {
+			goto_piece_removal();
+		}
+		else {
+			goto_piece_placement();
+		}
 	},
 }
 
-function goto_strategy_phase() {
-	clear_undo()
-	log_h2(game.active)
-	game.state = "strategy_phase"
+states.operations_space_type_selection = {
+	inactive: "choose target space type for operations",
+	prompt() {
+		view.prompt = "Choose target space type for operations.";
+		view.actions.political = 1;
+		view.actions.military = 1;
+	},
+	political() {
+		log("Operations space type: Political");
+		game.operations_space_type = "Political";
+		game.operations_action = "check_removal_scope";
+		goto_operations_execution();
+	},
+	military() {
+		log("Operations space type: Military");
+		game.operations_space_type = "Military";
+		game.operations_action = "check_removal_scope";
+		goto_operations_execution();
+	},
 }
 
-function resume_strategy_phase() {
-	game.active = enemy_player()
-	goto_strategy_phase()
+states.piece_placement = {
+	inactive: "place piece",
+	prompt() {
+		const cost = place_space_piece(game.operations_space_id);
+		game.operations_points -= cost;
+		log(`Piece placed for ${cost} operations point${cost > 1 ? "s" : ""}`);
+		goto_operations_execution();
+	}
+}
+
+states.piece_removal = {
+	inactive: "remove piece",
+	prompt() {
+		if (game.operations_space_type === "Political") {
+			remove_space_piece(game.operations_space_id);
+			game.operations_points -= 1;
+			log("Piece removed for 1 operations point");
+			goto_operations_execution();
+		}
+		else {
+			game.operations_military_strength = calculate_military_strength(game.operations_space_id);
+			if (game.operations_military_strength >= 3) {
+				const cost = remove_space_piece(game.operations_space_id);
+				game.operations_points -= cost;
+				log(`Piece removed for ${cost} operations point${cost > 1 ? "s" : ""}`);
+				goto_operations_execution();
+			}
+			else {
+				const operationCost = get_operation_cost(game.operations_space_id);
+				if (game.operations_points - operationCost === 0) {
+					evaluate_military_strength();
+					goto_operations_execution();
+				}
+				else {
+					view.prompt = `Your military strength is ${military_strength}. Do you want to spend an extra operations point?`;
+					view.actions.increase_military_strength = 1;
+					view.actions.evaluate_card = 1;
+				}
+			}
+		}
+	},
+	increase_military_strength() {
+		game.operations_points--;
+		game.operations_military_strength++;
+		if (game.operations_military_strength >= 3) {
+			const cost = remove_space_piece(game.operations_space_id);
+			game.operations_points -= cost;
+			log(`Piece removed for ${cost} operations point${cost > 1 ? "s" : ""}`);
+			goto_operations_execution();
+		}
+		else {
+			evaluate_military_strength();
+			goto_operations_execution();
+		}
+	},
+	evaluate_card() {
+		evaluate_military_strength();
+		goto_operations_execution();
+	}
 }
 
 states.strategy_phase = {
 	inactive: "play a card",
 	prompt() {
 		view.prompt = "Play a card."
-		for (let c of player_hand(game.active)) {
-			console.log(game.active, "hand", c)
+		for (let c of get_player_hand(game.active_player)) {
 			if (is_strategy_card(c)) {
 				if (can_play_event(c))
 					gen_action("card_event", c)
 				gen_action("card_ops", c)
-				if (game.active_card > 0 && can_play_event(game.active_card))
+				if (game.discarded_card > 0 && can_play_event(game.discarded_card))
 					gen_action("card_use_discarded", c)
 				if (can_advance_momentum())
 					gen_action("card_advance_momentum", c)
@@ -341,24 +673,25 @@ states.strategy_phase = {
 	card_event(c) {
 		push_undo()
 		log(`Played #${c} for event.`)
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
+		array_remove_item(get_player_hand(game.active_player), c)
+		game.discarded_card = c
 		goto_play_event()
 	},
 	card_ops(c) {
-		push_undo()
-		log(`Played #${c} for ${data.cards[c].ops} ops.`)
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
-		game.count = data.cards[c].ops
-		game.state = "operations"
+		push_undo();
+		log(`Played #${c} for ${data.cards[c].ops} ops.`);
+		array_remove_item(get_player_hand(game.active_player), c);
+		// game.discarded_card = c;
+		game.operations_card = c;
+		game.operations_points = data.cards[c].ops;
+		game.state = "operations_space_type_selection";
 	},
 	card_advance_momentum(c) {
 		push_undo()
 		log(`Played #${c} to advance momentum.`)
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
-		if (game.active === "Commune")
+		array_remove_item(get_player_hand(game.active_player), c)
+		game.discarded_card = c
+		if (game.active_player === "Commune")
 			game.red_momentum += 1
 		else
 			game.blue_momentum += 1
@@ -367,12 +700,31 @@ states.strategy_phase = {
 	},
 	card_use_discarded(c) {
 		push_undo()
-		log(`Discarded #${c} to play #${game.active_card}.`)
-		let old_c = game.active_card
-		array_remove_item(player_hand(game.active), c)
-		game.active_card = c
+		log(`Discarded #${c} to play #${game.discarded_card}.`)
+		let old_c = game.discarded_card
+		array_remove_item(get_player_hand(game.active_player), c)
+		game.discarded_card = c
 		goto_play_event(old_c)
 	},
+}
+
+// === NAVIGATION ===
+
+function goto_piece_placement() {
+	game.state = "piece_placement";
+}
+
+function goto_piece_removal() {
+	game.state = "piece_removal";
+}
+
+function goto_initiative_phase() {
+	game.active_player = "Commune"
+	game.state = "initiative_phase"
+}
+
+function goto_operations_execution() {
+	game.state = "operations_execution";
 }
 
 function goto_play_event(c) {
@@ -382,15 +734,288 @@ function goto_play_event(c) {
 	resume_strategy_phase()
 }
 
+function goto_strategy_phase() {
+	clear_undo()
+	log_h2(game.active_player)
+	game.state = "strategy_phase"
+}
+
+function resume_strategy_phase() {
+	game.active_player = get_enemy_player()
+	goto_strategy_phase()
+}
+
+// === LOGIC ===
+
+function activate_scope_spaces() {
+	clear_action("space");
+	for (const spaceId of game.operations_space_scope) {
+		gen_action("space", spaceId);
+	}
+}
+
+function adjust_operations_space_scope(operations_action) {
+	for (const space_id of [...game.operations_space_scope]) {
+		if (game.operations_space_type === "Military" && game.discs.some((value, index) => value === space_id && get_enemy_player() === "Commune" ?
+			index < 2 : index >= 2) && game.operations_points < 2) {
+				game.operations_space_scope = game.operations_space_scope.filter(x => x !== space_id);
+		}
+		else if (operations_action === "place") {
+			if (game.cubes.filter((value, index) => value === space_id && game.active_player === "Commune" ? index < 18 : index >= 18).length === 4) {
+				game.operations_space_scope = game.operations_space_scope.filter(x => x !== space_id);
+			}
+		}
+		else if (operations_action === "remove") {
+			if (!game.spaces.some(x => x.id === space_id && x.presence.includes(get_enemy_player()))) {
+				game.operations_space_scope = game.operations_space_scope.filter(x => x !== space_id);
+			}
+		}
+	}
+}
+
+function calculate_military_strength(space_id) {
+	let strength = 0;
+	const space = game.spaces.find(x => x.id === space_id);
+	for (const adjacent_space of game.spaces.filter(x => x.adjacent_to.includes(space_id))) {
+		if (is_space_control(adjacent_space.id)) {
+			strength++;
+		}
+	}
+	if (space.presence.includes(game.active_player)) {
+		strength++;
+	}
+	if (space.controlled_by === game.active_player) {
+		strength++;
+	}
+	return strength;
+}
+
+function can_advance_momentum() {
+	return game.active_player === "Commune" ? game.red_momentum < 3: game.blue_momentum < 3;
+}
+
+function can_play_event(c) {
+	let side = data.cards[c].side;
+	return side === game.active_player || side === "Neutral";
+}
+
+function clean_operations_execution() {
+	game.discarded_card = game.operations_card;
+	handle_crisis_breaches()
+	game.operations_card = 0;
+	game.operations_points = 0;
+	game.operations_space_type = null;
+	game.operations_space_scope = [];
+	game.operations_space_id = null;
+	game.operations_action = null;
+	game.operations_military_strength = 0;
+}
+
+function evaluate_military_strength() {
+	// card should be removed from the game but it will be later replaced by the strategy card played
+	game.discarded_card = game.strategy_deck.pop();
+	if (game.operations_military_strength >= data.cards[game.discarded_card].ops) {
+		const cost = remove_space_piece(game.operations_space_id);
+		game.operations_points -= cost;
+		log(`Piece removed for ${cost} operations point${cost > 1 ? "s" : ""}`);
+	}
+	else {
+		const operation_cost = get_operation_cost(game.operations_space_id);
+		game.operations_points -= operation_cost;
+		log(`Piece not removed. ${operation_cost} operations point${operation_cost > 1 ? "s" : ""} spent.`);
+	}
+}
+
+function evaluate_space(space_id) {
+	const space = game.spaces.find(x => x.id === space_id);
+	const commune_pieces = game.cubes.filter((value, index) => value === space_id && index < 18).length +
+		game.discs.filter((value, index) => value === space_id && index < 2).length;
+	const versailles_pieces = game.cubes.filter((value, index) => value === space_id && index >= 18).length +
+		game.discs.filter((value, index) => value === space_id && index >= 2).length;
+	space.presence = [];
+	if (commune_pieces > 0 || space.permanent_presence === "Commune") {
+		space.presence.push("Commune");
+	}
+	if (versailles_pieces > 0 || space.permanent_presence === "Versailles") {
+		space.presence.push("Versailles");
+	}
+	space.controlled_by = commune_pieces > versailles_pieces ? "Commune" : commune_pieces < versailles_pieces ? "Versailles" : "None";
+}
+
+function get_cube_for_placement() {
+	let cube_index = -1;
+	if (game.active_player === "Commune") {
+		for (let i = RED_CUBE_POOL.length - 1; i >= 0; i--) {
+			cube_index = game.cubes.findIndex(x => x === RED_CUBE_POOL[i]);
+			if (cube_index !== -1) {
+				break;
+			}
+		}
+		if (cube_index === -1) {
+			for (let i = 0; i < RED_CRISIS_TRACK.length; i++) {
+				cube_index = game.cubes.findIndex(x => x === RED_CRISIS_TRACK[i]);
+				if (cube_index !== -1) {
+					break;
+				}
+			}
+		}
+	}
+	else {
+		cube_index = game.cubes.findIndex(x => x === BLUE_CUBE_POOL);
+		if (cube_index === -1) {
+			for (let i = 0; i < BLUE_CRISIS_TRACK.length; i++) {
+				cube_index = game.cubes.findIndex(x => x === BLUE_CRISIS_TRACK[i]);
+				if (cube_index !== -1) {
+					break;
+				}
+			}
+		}
+	}
+	return cube_index;
+}
+
+function get_enemy_player() {
+	return game.active_player === "Commune" ? "Versailles" : "Commune";
+}
+
+function get_available_commune_pool() {
+	let commune_pool_id = -1
+	if (game.red_momentum > 0) {
+		const cube_pools = RED_CUBE_POOL.slice(0, game.red_momentum);
+		const cubes_count = game.cubes.filter((x, index) => index < 18 && cube_pools.includes(x));
+		if (cubes_count < 2) {
+			commune_pool_id = RED_CUBE_POOL[0];
+		}
+		else if (cubes_count < 3 && game.red_momentum > 1) {
+			commune_pool_id = RED_CUBE_POOL[1];
+		}
+		else if (cubes_count < 4 && game.red_momentum > 2) {
+			commune_pool_id = RED_CUBE_POOL[2];
+		}
+	}
+	return commune_pool_id;
+}
+
+function get_operation_cost(space_id) {
+	return game.discs.some((value, index) => value === space_id && get_enemy_player() === "Commune" ? index < 2 : index >= 2) ? 2 : 1;
+}
+
+function get_player_hand(current) {
+	return current === "Commune" ? game.red_hand : game.blue_hand;
+}
+
+function is_objective_card(c) {
+	return c >= 42 && c <= 53;
+}
+
+function is_space_presence(space_id) {
+	return game.spaces.some(x => x.id === space_id && x.presence.includes(game.active_player));
+}
+
+function is_space_control(space_id) {
+	return game.spaces.some(x => x.id === space_id && x.controlled_by === game.active_player);
+}
+
+function is_strategy_card(c) {
+	return !is_objective_card(c) && c !== 17 && c !== 34;
+}
+
+function handle_crisis_breaches() {
+	for (const crisis_zone of crisis_zones.filter(x => x.player === game.active_player && x.is_breachable)) {
+		if (crisis_zone.size > game.cubes.filter(x => x === crisis_zone.id).length && game.cubes.some(x => x === crisis_zone.bonus_area)) {
+			for (const bonus_cube of game.cubes.filter(x => x === crisis_zone.bonus_area)) {
+				if (crisis_zone.player === "Commune") {
+					const commune_pool_id = get_available_commune_pool();
+					bonus_cube = commune_pool_id;
+				}
+				else {
+					bonus_cube = BLUE_CUBE_POOL;
+				}
+			}
+			if (crisis_zone.name === "Final Crisis") {
+				const enemy_final_crisis = crisis_zones.find(x => x.name === crisis_zone.name && x.player !== crisis_zone.player);
+				if (enemy_final_crisis.size === game.cubes.filter(x => x === enemy_final_crisis.id).length) {
+					// TODO: adjust game.political_vp
+					for (const enemy_bonus_cube of game.cubes.filter(x => x === enemy_final_crisis.id)) {
+						enemy_bonus_cube = -1;
+					}
+				}
+			}
+		}
+	}
+}
+
+function place_space_piece(space_id) {
+	let cost = 0;
+	const cube_index = get_cube_for_placement();
+	if (cube_index !== -1) {
+		game.cubes[cube_index] = space_id;
+		cost = game.discs.some((value, index) => value === space_id && get_enemy_player() === "Commune" ? index < 2 : index >= 2) ? 2 : 1;
+		evaluate_space(space_id);
+	}
+	return cost;
+}
+
+function remove_space_piece(space_id) {
+	let cost = 0;
+	const cube_index = game.cubes.findIndex((value, index) => value === space_id && get_enemy_player() === "Commune" ? index < 18 : index >= 18);
+	const disc_index = game.discs.findIndex((value, index) => value === space_id && get_enemy_player() === "Commune" ? index < 2 : index >= 2);
+	if (cube_index !== -1) {
+		if (get_enemy_player() === "Commune") {
+			const commune_pool_id = get_available_commune_pool();
+			game.cubes[cube_index] = commune_pool_id;
+		}
+		else {
+			game.cubes[cube_index] = BLUE_CUBE_POOL;
+		}
+		cost = disc_index !== -1 ? 2 : 1;
+	}
+	else {
+		game.discs[disc_index] = -1;
+		cost = 2;
+	}
+	evaluate_space(space_id);
+	return cost;
+}
+
+function set_operations_space_scope() {
+	game.operations_space_scope = [];
+	for (const space of game.spaces) {
+		if (is_space_presence(space.id)) {
+			game.operations_space_scope.push(space.id);
+			continue;
+		}
+		for (const linked_space of space.adjacent_to) {
+			if (is_space_control(linked_space.id)) {
+				game.operations_space_scope.push(space.id);
+				break;
+			}
+		}
+	}
+}
+
 // === COMMON LIBRARY ===
+
+function clear_action(action) {
+	view.actions[action] = [];
+}
 
 function gen_action(action, argument) {
 	if (argument !== undefined) {
-		if (!(action in view.actions))
-			view.actions[action] = []
-		set_add(view.actions[action], argument)
+		if (!(action in view.actions)) {
+			view.actions[action] = [];
+		}
+		set_add(view.actions[action], argument);
 	} else {
-		view.actions[action] = 1
+		view.actions[action] = 1;
+	}
+}
+
+function remove_action(action, argument) {
+	if (argument !== undefined) {
+		if (action in view.actions) {
+			set_delete(view.actions[action], argument);
+		}
 	}
 }
 

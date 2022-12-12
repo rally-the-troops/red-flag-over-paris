@@ -1,6 +1,6 @@
 "use strict"
 
-const space_count = data.space_names.length
+const space_count = data.box_names.length
 
 let layout = []
 let space_layout_cube = []
@@ -44,7 +44,9 @@ const boxes = {
 	"Blue Crisis Track Final Crisis": [728,244,333,446],
 	"Blue Objective Card": [479,3983,1088,218],
 	"Red Objective Card": [4454,3984,1088,218],
-	"Red Cube Pool": [4498,790,791,219],
+	"Red Pool 1": [3149,1319,461,157],
+	"Red Pool 2": [3610,1319,543,157],
+	"Red Pool 3": [4154,1319,629,157],
 	"Blue Cube Pool": [720,790,791,219],
 	"Red Bonus Cubes 1": [4289,89,334,155],
 	"Red Bonus Cubes 2": [4623,89,332,155],
@@ -139,7 +141,7 @@ function build_user_interface() {
 	}
 
 	for (let i = 0; i < space_count; ++i) {
-		let name = data.space_names[i]
+		let name = data.box_names[i]
 		let r = boxes[name]
 		elt = ui.spaces[i] = document.createElement("div")
 		elt.className = "space"
@@ -240,10 +242,10 @@ function on_log(text) {
 }
 
 function on_update() {
-	if (view.active_card)
-		document.getElementById("active_card").className = `card card_${view.active_card}`
+	if (view.discarded_card)
+		document.getElementById("discarded_card").className = `card card_${view.discarded_card}`
 	else
-		document.getElementById("active_card").className = `card card_strategy_back`
+		document.getElementById("discarded_card").className = `card card_strategy_back`
 
 	if (view.initiative === "Commune")
 		document.getElementById("commune_info").textContent = "\u2756"
@@ -286,9 +288,15 @@ function on_update() {
 		ui.cards[i].classList.toggle("action", is_card_action('card', i))
 	}
 
-	action_button("commune", "Commune")
-	action_button("versailles", "Versailles")
-	action_button("undo", "Undo")
+	action_button("commune", "Commune");
+	action_button("versailles", "Versailles");
+	action_button("political", "Political");
+	action_button("military", "Military");
+	action_button("finish_pieces_removal", "Skip");
+	action_button("finish_operations_execution", "Finish")	;
+	action_button("increase_military_strength", "Yes");
+	action_button("evaluate_strategy_card", "No");
+	action_button("undo", "Undo");
 }
 
 /* CARD ACTION MENU */
