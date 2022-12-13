@@ -88,15 +88,18 @@ exports.view = function(state, current) {
 
 		active_card: game.active_card,
 		hand: 0,
+		final: 0,
 		objective: 0
 	}
 
 	if (current === "Commune") {
 		view.hand = game.red_hand
+		view.final = game.red_final
 		view.objective = game.red_objective
 	}
 	if (current === "Versailles") {
 		view.hand = game.blue_hand
+		view.final = game.blue_final
 		view.objective = game.blue_objective
 	}
 
@@ -144,10 +147,11 @@ exports.setup = function (seed, scenario, options) {
 
 		strategy_deck: [],
 		objective_deck: [],
-
 		red_hand: [ 34 ],
+		red_final: [],
 		red_objective: 0,
 		blue_hand: [ 17 ],
+		blue_final: [],
 		blue_objective: 0,
 
 		cubes: [

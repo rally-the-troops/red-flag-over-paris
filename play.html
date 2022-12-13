@@ -38,13 +38,35 @@ body.Versailles header.your_turn { background-color: skyblue; }
 	cursor: pointer;
 }
 
-#hand {
+#hand, #final {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
-	margin: 20px;
 	gap: 20px;
 }
+
+#hand {
+	margin: 20px auto;
+}
+
+#final_header {
+	padding: 6px 24px;
+	background-color: #444;
+	max-width: 1500px;
+	color: white;
+	margin: 36px auto 0 auto;
+}
+
+#final {
+	margin: 0 auto 36px auto;
+	padding: 24px;
+	background-color: #555;
+	min-height: 350px;
+	max-width: 1500px;
+}
+
+body.Observer #final_header { display: none }
+body.Observer #final { display: none }
 
 .card {
 	background-size: cover;
@@ -376,7 +398,7 @@ body.Versailles header.your_turn { background-color: skyblue; }
 
 <main>
 
-<div id="mapwrap" class="fit">
+<div id="mapwrap">
 <div id="map">
 <div id="spaces"></div>
 <div id="pieces">
@@ -390,6 +412,8 @@ body.Versailles header.your_turn { background-color: skyblue; }
 </div>
 
 <div id="hand"></div>
+<div id="final_header">Set-aside cards</div>
+<div id="final"></div>
 
 </main>
 

@@ -266,11 +266,15 @@ function on_update() {
 	ui.political_vp.className = `piece cylinder orange vp${5+view.political_vp}`
 
 	document.getElementById("hand").replaceChildren()
+	document.getElementById("final").replaceChildren()
 	if (view.objective)
 		document.getElementById("hand").appendChild(ui.cards[view.objective])
 	if (view.hand)
 		for (let c of view.hand)
 			document.getElementById("hand").appendChild(ui.cards[c])
+	if (view.final)
+		for (let c of view.final)
+			document.getElementById("final").appendChild(ui.cards[c])
 
 	for (let i = 0; i < space_count; ++i)
 		layout[i] = []
