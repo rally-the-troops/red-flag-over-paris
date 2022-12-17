@@ -40,9 +40,9 @@
      inkscape:window-height="480"
      id="namedview6"
      showgrid="false"
-     inkscape:zoom="0.57188876"
-     inkscape:cx="4053.5891"
-     inkscape:cy="1139.1727"
+     inkscape:zoom="0.34602608"
+     inkscape:cx="4969.0729"
+     inkscape:cy="1902.0938"
      inkscape:current-layer="svg4"
      inkscape:document-rotation="0"
      showguides="true"
@@ -51,15 +51,39 @@
        position="1524.3408,4111.2609"
        orientation="0,-1"
        id="guide74" />
+    <sodipodi:guide
+       position="3149.4634,2880.8708"
+       orientation="0,-1"
+       id="guide51" />
+    <sodipodi:guide
+       position="3149.4634,2723.4476"
+       orientation="0,-1"
+       id="guide53" />
+    <sodipodi:guide
+       position="1224.9032,2881.869"
+       orientation="1,0"
+       id="guide55" />
+    <sodipodi:guide
+       position="1852.6179,2881.869"
+       orientation="1,0"
+       id="guide57" />
+    <sodipodi:guide
+       position="2398.5044,2881.869"
+       orientation="1,0"
+       id="guide59" />
+    <sodipodi:guide
+       position="2859.5415,2881.869"
+       orientation="1,0"
+       id="guide61" />
   </sodipodi:namedview>
   <image
      sodipodi:absref="/home/tor/src/rally/public/red-flag-over-paris/HIRES/map.jpg"
      xlink:href="../HIRES/map.jpg"
-     sodipodi:insensitive="true"
-     id="image2"
-     width="6000"
+     preserveAspectRatio="none"
      height="4200"
-     preserveAspectRatio="none" />
+     width="6000"
+     id="image2"
+     sodipodi:insensitive="true" />
   <rect
      style="fill:#000000;fill-opacity:0.215447;stroke:#222222"
      id="rect12"
@@ -255,14 +279,6 @@
      inkscape:label="Red Objective Card" />
   <rect
      style="fill:#000000;fill-opacity:0.215447;stroke:#222222"
-     id="rect62-3"
-     width="791.04541"
-     height="218.70306"
-     x="4497.7349"
-     y="789.71698"
-     inkscape:label="Red Cube Pool" />
-  <rect
-     style="fill:#000000;fill-opacity:0.215447;stroke:#222222"
      id="rect62"
      width="791.04541"
      height="218.70306"
@@ -389,7 +405,7 @@
      height="157.42322"
      x="3149.4634"
      y="1319.1292"
-     inkscape:label="Red Pool 1" />
+     inkscape:label="Red Cube Pool 1" />
   <rect
      style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:0.996788"
      id="rect56"
@@ -397,7 +413,7 @@
      height="157.42322"
      x="3610.4934"
      y="1319.1292"
-     inkscape:label="Red Pool 2" />
+     inkscape:label="Red Cube Pool 2" />
   <rect
      style="fill:#000000;fill-opacity:0.215447;stroke:#222222;stroke-width:0.99799"
      id="rect58-3"
@@ -405,5 +421,29 @@
      height="157.92198"
      x="4153.5479"
      y="1318.6304"
-     inkscape:label="Red Pool 3" />
+     inkscape:label="Red Cube Pool 3" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:1;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+     id="rect891"
+     width="461.03711"
+     height="157.4232"
+     x="2398.5044"
+     y="1319.1292"
+     inkscape:label="Prussian Collaboration 1" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:1;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+     id="rect889"
+     width="545.88647"
+     height="157.4232"
+     x="1852.6179"
+     y="1319.1292"
+     inkscape:label="Prussian Collaboration 2" />
+  <rect
+     style="fill:none;stroke-width:1;stroke-miterlimit:10;stroke:#000000;stroke-opacity:1;stroke-dasharray:none"
+     id="rect63"
+     width="627.71472"
+     height="157.4232"
+     x="1224.9032"
+     y="1319.1292"
+     inkscape:label="Prussian Collaboration 3" />
 </svg>

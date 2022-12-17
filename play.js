@@ -44,9 +44,6 @@ const boxes = {
 	"Blue Crisis Track Final Crisis": [728,244,333,446],
 	"Blue Objective Card": [479,3983,1088,218],
 	"Red Objective Card": [4454,3984,1088,218],
-	"Red Pool 1": [3149,1319,461,157],
-	"Red Pool 2": [3610,1319,543,157],
-	"Red Pool 3": [4154,1319,629,157],
 	"Blue Cube Pool": [720,790,791,219],
 	"Red Bonus Cubes 1": [4289,89,334,155],
 	"Red Bonus Cubes 2": [4623,89,332,155],
@@ -54,6 +51,12 @@ const boxes = {
 	"Blue Bonus Cubes 1": [1394,89,334,155],
 	"Blue Bonus Cubes 2": [1061,89,333,155],
 	"Blue Bonus Cubes 3": [728,89,333,155],
+	"Red Cube Pool 1": [3149,1319,461,157],
+	"Red Cube Pool 2": [3610,1319,543,157],
+	"Red Cube Pool 3": [4154,1319,629,157],
+	"Prussian Collaboration 1": [2399,1319,461,157],
+	"Prussian Collaboration 2": [1853,1319,546,157],
+	"Prussian Collaboration 3": [1225,1319,628,157],
 }
 
 function is_card_action(action, card) {
